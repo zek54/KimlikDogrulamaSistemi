@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Giriş - Gelişmiş Kimlik Doğrulama{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-logo">
+        <i class="fas fa-lock"></i>
+    </div>
+    <h2 class="auth-title">Giriş Yap</h2>
+
+    {% if error %}
+    <div class="error-message text-center">
+        <i class="fas fa-exclamation-circle"></i> {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="username" name="username" placeholder="Kullanıcı Adı" required>
+            <label for="username">👤 Kullanıcı Adı</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="password" name="password" placeholder="Şifre" required>
+            <label for="password">🔒 Şifre</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="remember" name="remember">
+            <label class="form-check-label" for="remember">
+                Beni Hatırla
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt"></i> Giriş Yap
+        </button>
+    </form>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('register') }}" class="nav-link d-inline-block me-3">
+            <i class="fas fa-user-plus"></i> Yeni Hesap
+        </a>
+        <a href="{{ url_for('reset_password') }}" class="nav-link d-inline-block">
+            <i class="fas fa-key"></i> Şifremi Unuttum
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Şifre göster/gizle fonksiyonu
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.createElement('button');
+    togglePassword.type = 'button';
+    togglePassword.className = 'btn btn-link position-absolute end-0 top-50 translate-middle-y text-white';
+    togglePassword.innerHTML = '<i class="fas fa-eye"></i>';
+    togglePassword.style.zIndex = '10';
+    
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    });
+    
+    passwordInput.parentElement.style.position = 'relative';
+    passwordInput.parentElement.appendChild(togglePassword);
+});
+</script>
+{% endblock %} 

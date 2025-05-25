@@ -1,0 +1,26 @@
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-CORS==4.0.0
+gunicorn==21.2.0
+Werkzeug==3.0.1
+SQLAlchemy==2.0.25
+python-dotenv==1.0.0
+bcrypt==4.1.2
+PyQt5==5.15.4
+qrcode==7.3
+Pillow==8.3.1
+Flask-Mail==0.9.1
+python-dotenv==0.19.0
+werkzeug==2.0.1
+pyotp==2.6.0
+requests>=2.31.0
+ttkbootstrap>=1.10.1
+psutil>=5.9.8
+pywin32>=306; platform_system == "Windows"
+cryptography>=42.0.5
+python-dateutil>=2.8.2
+typing-extensions>=4.9.0
+python-magic-bin>=0.4.14
+yara-python>=4.3.1
+pefile>=2023.2.7 

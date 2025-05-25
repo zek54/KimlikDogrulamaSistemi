@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Kullanıcı Paneli - Gelişmiş Kimlik Doğrulama{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Kullanıcı Bilgileri -->
+        <div class="col-md-6 mb-4">
+            <div class="dashboard-card">
+                <h3 class="mb-4">
+                    <i class="fas fa-user"></i> Kullanıcı Bilgileri
+                </h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th>Kullanıcı Adı:</th>
+                            <td>{{ user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Kayıt Tarihi:</th>
+                            <td>{{ user.created_at }}</td>
+                        </tr>
+                        <tr>
+                            <th>Son Giriş:</th>
+                            <td>{{ user.last_login }}</td>
+                        </tr>
+                        <tr>
+                            <th>Son IP:</th>
+                            <td>{{ user.last_ip }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hızlı İşlemler -->
+        <div class="col-md-6 mb-4">
+            <div class="dashboard-card">
+                <h3 class="mb-4">
+                    <i class="fas fa-cogs"></i> Hızlı İşlemler
+                </h3>
+                <div class="d-grid gap-3">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        <i class="fas fa-key"></i> Şifre Değiştir
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changeEmailModal">
+                        <i class="fas fa-envelope"></i> Email Değiştir
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#securityQuestionModal">
+                        <i class="fas fa-shield-alt"></i> Güvenlik Sorusunu Güncelle
+                    </button>
+                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                        <i class="fas fa-user-times"></i> Hesabı Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Giriş Geçmişi -->
+        <div class="col-12">
+            <div class="dashboard-card">
+                <h3 class="mb-4">
+                    <i class="fas fa-history"></i> Giriş Geçmişi
+                </h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>IP Adresi</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in login_history %}
+                            <tr>
+                                <td>{{ log.login_time }}</td>
+                                <td>{{ log.ip_address }}</td>
+                                <td>
+                                    {% if log.success %}
+                                    <span class="text-success">
+                                        <i class="fas fa-check-circle"></i> Başarılı
+                                    </span>
+                                    {% else %}
+                                    <span class="text-danger">
+                                        <i class="fas fa-times-circle"></i> Başarısız
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Şifre Değiştirme Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Şifre Değiştir</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="changePasswordForm" action="{{ url_for('change_password') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">Mevcut Şifre</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">Yeni Şifre</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password" required>
+                        <div id="passwordStrength" class="mt-2"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Yeni Şifre (Tekrar)</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Değiştir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Email Değiştirme Modal -->
+<div class="modal fade" id="changeEmailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Email Değiştir</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('change_email') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Şifreniz</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_email" class="form-label">Yeni Email</label>
+                        <input type="email" class="form-control" id="new_email" name="new_email" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Değiştir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Güvenlik Sorusu Modal -->
+<div class="modal fade" id="securityQuestionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Güvenlik Sorusunu Güncelle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('change_security_question') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Şifreniz</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="security_question" class="form-label">Yeni Güvenlik Sorusu</label>
+                        <select class="form-select" id="security_question" name="security_question" required>
+                            <option value="">Seçiniz...</option>
+                            <option value="İlk evcil hayvanınızın adı nedir?">İlk evcil hayvanınızın adı nedir?</option>
+                            <option value="Annenizin kızlık soyadı nedir?">Annenizin kızlık soyadı nedir?</option>
+                            <option value="İlk okulunuzun adı nedir?">İlk okulunuzun adı nedir?</option>
+                            <option value="Doğduğunuz şehir neresidir?">Doğduğunuz şehir neresidir?</option>
+                            <option value="En sevdiğiniz öğretmenin adı nedir?">En sevdiğiniz öğretmenin adı nedir?</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="security_answer" class="form-label">Yeni Cevap</label>
+                        <input type="text" class="form-control" id="security_answer" name="security_answer" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Hesap Silme Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Hesabı Sil</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('delete_account') }}" method="POST">
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Bu işlem geri alınamaz! Hesabınız ve tüm verileriniz kalıcı olarak silinecektir.
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Şifreniz</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirm_delete" required>
+                            <label class="form-check-label" for="confirm_delete">
+                                Hesabımı silmek istediğimi onaylıyorum
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-danger">Hesabı Sil</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Şifre gücü kontrolü
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        const feedback = [];
+
+        if (password.length < 8) {
+            feedback.push('En az 8 karakter olmalı');
+        } else {
+            strength += 1;
+        }
+
+        if (password.match(/[A-Z]/)) {
+            strength += 1;
+        } else {
+            feedback.push('En az bir büyük harf içermeli');
+        }
+
+        if (password.match(/[a-z]/)) {
+            strength += 1;
+        } else {
+            feedback.push('En az bir küçük harf içermeli');
+        }
+
+        if (password.match(/[0-9]/)) {
+            strength += 1;
+        } else {
+            feedback.push('En az bir rakam içermeli');
+        }
+
+        if (password.match(/[^A-Za-z0-9]/)) {
+            strength += 1;
+        } else {
+            feedback.push('En az bir özel karakter içermeli');
+        }
+
+        return {
+            strength: strength,
+            feedback: feedback
+        };
+    }
+
+    // Şifre değiştirme formu kontrolü
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    const newPasswordInput = document.getElementById('new_password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const strengthDiv = document.getElementById('passwordStrength');
+
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener('input', function() {
+            const result = checkPasswordStrength(this.value);
+            const strengthText = ['Çok Zayıf', 'Zayıf', 'Orta', 'İyi', 'Güçlü'];
+            const strengthColor = ['#f44336', '#ff9800', '#ffeb3b', '#8bc34a', '#4caf50'];
+            
+            if (this.value) {
+                let html = `<div style="color: ${strengthColor[result.strength-1]}">
+                    Şifre Gücü: ${strengthText[result.strength-1]}
+                </div>`;
+                
+                if (result.feedback.length > 0) {
+                    html += `<div style="color: #f44336; margin-top: 5px">
+                        ${result.feedback.join('<br>')}
+                    </div>`;
+                }
+                
+                strengthDiv.innerHTML = html;
+            } else {
+                strengthDiv.innerHTML = '';
+            }
+        });
+    }
+
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', function(e) {
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('Şifreler eşleşmiyor!');
+                return;
+            }
+            
+            const result = checkPasswordStrength(newPassword);
+            if (result.strength < 3) {
+                e.preventDefault();
+                alert('Lütfen daha güçlü bir şifre seçin!');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %} 

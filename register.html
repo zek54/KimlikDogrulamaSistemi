@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Kayıt - Gelişmiş Kimlik Doğrulama{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-logo">
+        <i class="fas fa-user-plus"></i>
+    </div>
+    <h2 class="auth-title">Yeni Hesap Oluştur</h2>
+
+    {% if error %}
+    <div class="error-message text-center">
+        <i class="fas fa-exclamation-circle"></i> {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="username" name="username" placeholder="Kullanıcı Adı" required>
+            <label for="username">👤 Kullanıcı Adı</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+            <label for="email">📧 Email</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="password" name="password" placeholder="Şifre" required>
+            <label for="password">🔒 Şifre</label>
+            <div id="passwordStrength" class="mt-2" style="font-size: 0.9em;"></div>
+        </div>
+
+        <div class="form-floating mb-3">
+            <select class="form-select" id="security_question" name="security_question" required>
+                <option value="">Seçiniz...</option>
+                <option value="İlk evcil hayvanınızın adı nedir?">İlk evcil hayvanınızın adı nedir?</option>
+                <option value="Annenizin kızlık soyadı nedir?">Annenizin kızlık soyadı nedir?</option>
+                <option value="İlk okulunuzun adı nedir?">İlk okulunuzun adı nedir?</option>
+                <option value="Doğduğunuz şehir neresidir?">Doğduğunuz şehir neresidir?</option>
+                <option value="En sevdiğiniz öğretmenin adı nedir?">En sevdiğiniz öğretmenin adı nedir?</option>
+            </select>
+            <label for="security_question">🔑 Güvenlik Sorusu</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="security_answer" name="security_answer" placeholder="Cevap" required>
+            <label for="security_answer">🗝 Güvenlik Sorusu Cevabı</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Hesap Oluştur
+        </button>
+    </form>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('login') }}" class="nav-link">
+            <i class="fas fa-sign-in-alt"></i> Giriş Yap
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Şifre göster/gizle fonksiyonu
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.createElement('button');
+    togglePassword.type = 'button';
+    togglePassword.className = 'btn btn-link position-absolute end-0 top-50 translate-middle-y text-white';
+    togglePassword.innerHTML = '<i class="fas fa-eye"></i>';
+    togglePassword.style.zIndex = '10';
+    
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    });
+    
+    passwordInput.parentElement.style.position = 'relative';
+    passwordInput.parentElement.appendChild(togglePassword);
+
+    // Şifre gücü kontrolü
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        const feedback = [];
+
+        if (password.length < 8) {
+            feedback.push('En az 8 karakter olmalı');
+        } else {
+            strength += 1;
+        }
+
+        if (password.match(/[A-Z]/)) {
+            strength += 1;
+        } else {
+            feedback.push('En az bir büyük harf içermeli');
+        }
+
+        if (password.match(/[a-z]/)) {
+            strength += 1;
+        } else {
+            feedback.push('En az bir küçük harf içermeli');
+        }
+
+        if (password.match(/[0-9]/)) {
+            strength += 1;
+        } else {
+            feedback.push('En az bir rakam içermeli');
+        }
+
+        if (password.match(/[^A-Za-z0-9]/)) {
+            strength += 1;
+        } else {
+            feedback.push('En az bir özel karakter içermeli');
+        }
+
+        return {
+            strength: strength,
+            feedback: feedback
+        };
+    }
+
+    const strengthDiv = document.getElementById('passwordStrength');
+    passwordInput.addEventListener('input', function() {
+        const result = checkPasswordStrength(this.value);
+        const strengthText = ['Çok Zayıf', 'Zayıf', 'Orta', 'İyi', 'Güçlü'];
+        const strengthColor = ['#f44336', '#ff9800', '#ffeb3b', '#8bc34a', '#4caf50'];
+        
+        if (this.value) {
+            let html = `<div style="color: ${strengthColor[result.strength-1]}">
+                Şifre Gücü: ${strengthText[result.strength-1]}
+            </div>`;
+            
+            if (result.feedback.length > 0) {
+                html += `<div style="color: #f44336; margin-top: 5px">
+                    ${result.feedback.join('<br>')}
+                </div>`;
+            }
+            
+            strengthDiv.innerHTML = html;
+        } else {
+            strengthDiv.innerHTML = '';
+        }
+    });
+
+    // Form gönderilmeden önce kontrol
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const password = passwordInput.value;
+        const result = checkPasswordStrength(password);
+        
+        if (result.strength < 3) {
+            e.preventDefault();
+            alert('Lütfen daha güçlü bir şifre seçin!');
+        }
+    });
+});
+</script>
+{% endblock %} 
